@@ -263,6 +263,22 @@ function get_search_results_context($search_query) {
 }
 
 function wpsolr_search_results_shortcode() {
+    // Obter o termo de busca da query string
+    $search_query = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
+
+    // Se o termo de busca não for fornecido, mostrar mensagem de erro
+    if (empty($search_query)) {
+        return 'Por favor, forneça um termo de busca.';
+    }
+
+    // Obter o contexto dos resultados da busca
+    $context = get_search_results_context($search_query);
+
+    // Se o contexto estiver vazio, não executar nada
+    if (empty($context)) {
+        return 'Nenhum resultado encontrado.';
+    }
+
     // Gera um nonce
     $nonce = wp_create_nonce('wp_rest');
     
@@ -292,40 +308,33 @@ function wpsolr_search_results_shortcode() {
     </style>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var urlParams = new URLSearchParams(window.location.search);
-        var searchQuery = urlParams.get('s');
+        var searchQuery = '<?php echo esc_js($search_query); ?>';
+        var context = '<?php echo esc_js($context); ?>';
         
         if (searchQuery) {
-            // Obter o contexto dos resultados da busca
-            var context = '<?php echo esc_js(get_search_results_context($searchQuery)); ?>';
-            
-            if (context !== '') {
-                document.getElementById('loading-indicator').style.display = 'block';
-                fetch('<?php echo esc_url(rest_url('sustentoteca/v1/process_with_chatgpt')); ?>', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-WP-Nonce': '<?php echo esc_attr($nonce); ?>'
-                    },
-                    body: JSON.stringify({ prompt: searchQuery, context: context }) // Passa o contexto obtido da função PHP
-                })
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('loading-indicator').style.display = 'none';
-                    if (data) {
-                        document.getElementById('search-results').innerHTML = data;
-                    } else {
-                        document.getElementById('search-results').innerHTML = 'Erro ao processar a resposta da IA.';
-                    }
-                })
-                .catch(error => {
-                    document.getElementById('loading-indicator').style.display = 'none';
-                    console.error('Erro:', error);
-                    document.getElementById('search-results').innerHTML = 'Erro ao conectar com a API de IA.';
-                });
-            } else {
-                document.getElementById('search-results').innerHTML = 'Nenhum resultado encontrado.';
-            }
+            document.getElementById('loading-indicator').style.display = 'block';
+            fetch('<?php echo esc_url(rest_url('sustentoteca/v1/process_with_chatgpt')); ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': '<?php echo esc_attr($nonce); ?>'
+                },
+                body: JSON.stringify({ prompt: searchQuery, context: context })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading-indicator').style.display = 'none';
+                if (data) {
+                    document.getElementById('search-results').innerHTML = data;
+                } else {
+                    document.getElementById('search-results').innerHTML = 'Erro ao processar a resposta da IA.';
+                }
+            })
+            .catch(error => {
+                document.getElementById('loading-indicator').style.display = 'none';
+                console.error('Erro:', error);
+                document.getElementById('search-results').innerHTML = 'Erro ao conectar com a API de IA.';
+            });
         } else {
             document.getElementById('search-results').innerHTML = 'Por favor, forneça um termo de busca na URL como ?s=termo.';
         }
