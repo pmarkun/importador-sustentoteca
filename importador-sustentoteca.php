@@ -208,7 +208,7 @@ function process_with_chatgpt($prompt, $context) {
     if (isset($result['choices'][0]['message']['content'])) {
         return $result['choices'][0]['message']['content'];
     } else {
-        return 'Erro ao processar a resposta da IA.';
+        return 'Erro ao processar a resposta da IA.' . $result;
     }
 }
 
@@ -237,6 +237,7 @@ function wpsolr_search_results_shortcode() {
             })
             .then(response => response.json())
             .then(data => {
+                console.log(data);
                 if (data && data.message) {
                     document.getElementById('search-results').innerHTML = data.message.content;
                 } else {
