@@ -21,6 +21,7 @@ add_action('admin_menu', 'importador_sustentoteca_menu');
 function extract_youtube_id($url) {
     $pattern = '/(?<=v=)[a-zA-Z0-9-]+(?=&)|(?<=[0-9]\/)[^&\n]+|(?<=v=)[^&\n]+/i';
     if (preg_match($pattern, $url, $matches)) {
+        print_r($matches);
         return $matches[1];
     }
     return false;
