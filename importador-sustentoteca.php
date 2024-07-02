@@ -18,11 +18,10 @@ function importador_sustentoteca_menu() {
 
 add_action('admin_menu', 'importador_sustentoteca_menu');
 
-function process_media_urls($media_string) {
-    $urls = explode("\n", $media_string);
+function process_media_urls($media_array) {
     $html_output = '';
 
-    foreach ($urls as $url) {
+    foreach ($media_array as $url) {
         $url = trim($url);
         if (empty($url)) {
             continue;
@@ -53,6 +52,23 @@ function process_media_urls($media_string) {
     }
     return $html_output;
 }
+
+function media_sustentoteca_shortcode($atts) {
+    // Atributos do shortcode
+    $atts = shortcode_atts(array(
+        'post_id' => get_the_ID(), // Pega o ID do post atual se não for especificado
+    ), $atts);
+
+    // Pega o campo de mídia do post especificado
+    $media_field = get_post_meta($atts['post_id'], 'media', true); // Substitua 'media' pelo nome real do seu campo personalizado
+    if (is_array($media_field)) {
+        return process_media_urls($media_field); // Chama a função para processar e retornar o HTML
+    } else {
+        return 'Nenhuma mídia encontrada.';
+    }
+}
+
+add_shortcode('media_sustentoteca', 'media_sustentoteca_shortcode');
 
 
 function media_sustentoteca_shortcode($atts) {
