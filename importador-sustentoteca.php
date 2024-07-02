@@ -28,7 +28,7 @@ function extract_youtube_id($url) {
 
 
 function process_media_urls($media_array) {
-    $html_output = '';
+    $html_output = '<div class="media-container">';
 
     foreach ($media_array as $url) {
         $url = trim($url);
@@ -47,15 +47,17 @@ function process_media_urls($media_array) {
             $video_id = extract_youtube_id($url);
             // Atualização da expressão regular para capturar o ID do vídeo em várias formas de URLs do YouTube
             if (!empty($video_id)) {
-                $html_output .= '<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;"><iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" src="https://www.youtube.com/embed/' . esc_attr($video_id) . '" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><br>';
-
+                $html_output .= '<div class="media-item youtube-video"><div class="youtube-player"><iframe src="https://www.youtube.com/embed/' . esc_attr($video_id) . '" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div></div>';
             } else {
                 $html_output .= '<!-- YouTube URL found but no video ID extracted: ' . htmlspecialchars($url) . ' -->';
             }
+        } elseif (preg_match('/\.pdf$/i', $url)) {
+            $html_output .= '<div class="media-item pdf-viewer"><embed src="' . $url . '" type="application/pdf" width="100%" height="500px" /></div>';
         } else {
-            $html_output .= '<h2><a href="' . $url . '" target="_blank" style="text-decoration: none; color: #0073aa;"><i class="eco-icon-external-link"></i> ' . htmlspecialchars($url) . '</a></h2><br>';
+            $html_output .= '<div class="media-item normal-link"><a href="' . $url . '" target="_blank"><i class="eco-icon-external-link"></i> ' . htmlspecialchars($url) . '</a></div>';
         }
     }
+    $html_output .= '</div>';
     return $html_output;
 }
 
