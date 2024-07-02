@@ -60,7 +60,7 @@ function media_sustentoteca_shortcode($atts) {
     ), $atts);
 
     // Pega o campo de mídia do post especificado
-    $media_field = get_post_meta($post_id, 'media', true); // Substitua 'media' pelo nome real do seu campo personalizado
+    $media_field = get_post_meta($atts['post_id'], 'media', true); // Substitua 'media' pelo nome real do seu campo personalizado
 
     if (is_array($media_field)) {
         return process_media_urls($media_field); // Chama a função para processar e retornar o HTML
