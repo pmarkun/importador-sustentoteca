@@ -222,6 +222,46 @@ function process_with_chatgpt($prompt, $context) {
     }
 }
 
+function get_search_results_context($search_query) {
+    // Obter as opções do WPSOLR
+    $wpsolr_options = wpsolr\core\classes\services\WPSOLR_Service_Container::getOption();
+
+    // Criar uma nova instância do WPSOLR_Query
+    $wpsolr_query = wpsolr\core\classes\services\WPSOLR_Service_Container::get_query();
+
+    // Configurar os parâmetros da busca
+    $wpsolr_query->set_wpsolr_query($search_query);
+    $wpsolr_query->wpsolr_set_nb_results_by_page(5);
+
+    // Adicionar configurações específicas se necessário, como ordenação por relevância
+    $wpsolr_query->set('orderby', 'relevance'); // Ordenar por relevância
+    $wpsolr_query->set('order', 'DESC'); // Em ordem decrescente, se aplicável
+
+    // Executar a busca usando WPSOLR
+    try {
+        $wpsolr_query->get_posts();
+        $posts = $wpsolr_query->posts;
+    } catch (Exception $e) {
+        return 'Erro ao executar a busca: ' . $e->getMessage();
+    }
+
+    // Se não houver resultados, mostrar mensagem apropriada
+    if (empty($posts)) {
+        return 'Nenhum resultado encontrado.';
+    }
+
+    // Preparando a string de saída
+    $output = '';
+
+    foreach ($posts as $post) {
+        $title = wp_strip_all_tags($post->post_title);
+        $content = wp_strip_all_tags($post->post_content);
+        $output .= $title . "\n" . $content . "\n\n";
+    }
+
+    return $output;
+}
+
 function wpsolr_search_results_shortcode() {
     // Gera um nonce
     $nonce = wp_create_nonce('wp_rest');
@@ -263,7 +303,7 @@ function wpsolr_search_results_shortcode() {
                     'Content-Type': 'application/json',
                     'X-WP-Nonce': '<?php echo esc_attr($nonce); ?>'
                 },
-                body: JSON.stringify({ prompt: searchQuery, context: '' }) // Adapte conforme necessário para passar o contexto
+                body: JSON.stringify({ prompt: searchQuery, context: get_search_results_context(searchQuery) }) // Adapte conforme necessário para passar o contexto
             })
             .then(response => response.json())
             .then(data => {
