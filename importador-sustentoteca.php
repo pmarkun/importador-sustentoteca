@@ -28,7 +28,7 @@ function extract_youtube_id($url) {
 
 
 function process_media_urls($media_array) {
-    $html_output = '<div class="media-container">';
+    $html_output = '<div class="media-container" style="display: flex; flex-direction: column; align-items: center;">';
 
     foreach ($media_array as $url) {
         $url = trim($url);
@@ -46,14 +46,14 @@ function process_media_urls($media_array) {
         if (strpos($url, 'youtube.com') !== false || strpos($url, 'youtu.be') !== false) {
             $video_id = extract_youtube_id($url);
             if (!empty($video_id)) {
-                $html_output .= '<div class="media-item youtube-video" style="border-radius: 20px; border: 1px solid #61CE70; padding: 25px; margin-bottom: 15px; max-width: 600px;"><div class="youtube-player" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%;"><iframe src="https://www.youtube.com/embed/' . esc_attr($video_id) . '" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 20px;"></iframe></div></div>';
+                $html_output .= '<div class="media-item youtube-video" style="border-radius: 20px; border: 1px solid #61CE70; padding: 25px; margin-bottom: 15px; max-width: 600px; width: 100%;"><div class="youtube-player" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%;"><iframe src="https://www.youtube.com/embed/' . esc_attr($video_id) . '" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 20px;"></iframe></div></div>';
             } else {
                 $html_output .= '<!-- YouTube URL found but no video ID extracted: ' . htmlspecialchars($url) . ' -->';
             }
         } elseif (preg_match('/\.pdf$/i', $url)) {
-            $html_output .= '<div class="media-item pdf-viewer" style="border-radius: 20px; border: 1px solid #61CE70; padding: 25px; margin-bottom: 15px;"><embed src="' . $url . '" type="application/pdf" width="100%" height="500px" style="border-radius: 20px;" /></div>';
+            $html_output .= '<div class="media-item pdf-viewer" style="border-radius: 20px; border: 1px solid #61CE70; padding: 25px; margin-bottom: 15px; max-width: 600px; width: 100%;"><embed src="' . $url . '" type="application/pdf" width="100%" height="500px" style="border-radius: 20px;" /></div>';
         } else {
-            $html_output .= '<div class="media-item normal-link" style="border-radius: 20px; border: 1px solid #61CE70; padding: 25px; margin-bottom: 15px;"><a href="' . $url . '" target="_blank" style="text-decoration: none; color: #0073aa; display: flex; align-items: center;"><i class="eicon-link" style="margin-right: 10px;"></i> ' . htmlspecialchars($url) . '</a></div>';
+            $html_output .= '<div class="media-item normal-link" style="border-radius: 20px; border: 1px solid #61CE70; padding: 25px; margin-bottom: 15px; max-width: 600px; width: 100%;"><a href="' . $url . '" target="_blank" style="text-decoration: none; color: #0073aa; display: flex; align-items: center;"><i class="eicon-link" style="margin-right: 10px;"></i> ' . htmlspecialchars($url) . '</a></div>';
         }
     }
     $html_output .= '</div>';
