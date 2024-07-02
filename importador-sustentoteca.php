@@ -219,14 +219,34 @@ function wpsolr_search_results_shortcode() {
     ob_start();
     ?>
     <div id="search-results-container">
+        <div id="loading-indicator" style="display: none;">
+            <p>Processando com IA...</p>
+            <div class="spinner"></div>
+        </div>
         <div id="search-results"></div>
     </div>
+    <style>
+        .spinner {
+            margin: 16px auto;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, .1);
+            border-radius: 50%;
+            border-top-color: #0073aa;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         var urlParams = new URLSearchParams(window.location.search);
         var searchQuery = urlParams.get('s');
         
         if (searchQuery) {
+            document.getElementById('loading-indicator').style.display = 'block';
             fetch('<?php echo esc_url(rest_url('sustentoteca/v1/process_with_chatgpt')); ?>', {
                 method: 'POST',
                 headers: {
@@ -237,6 +257,7 @@ function wpsolr_search_results_shortcode() {
             })
             .then(response => response.json())
             .then(data => {
+                document.getElementById('loading-indicator').style.display = 'none';
                 if (data) {
                     document.getElementById('search-results').innerHTML = data;
                 } else {
@@ -244,6 +265,7 @@ function wpsolr_search_results_shortcode() {
                 }
             })
             .catch(error => {
+                document.getElementById('loading-indicator').style.display = 'none';
                 console.error('Erro:', error);
                 document.getElementById('search-results').innerHTML = 'Erro ao conectar com a API de IA.';
             });
