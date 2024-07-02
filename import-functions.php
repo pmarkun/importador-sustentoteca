@@ -54,18 +54,20 @@ function importador_conteudo( $file ) {
                 // If post exists, fetch its ID and update
                 $pod->fetch();
                 $item_id = $pod->id();
-                error_log('Updating existing item ID: ' . $item_id);
+                //error_log('Updating existing item ID: ' . $item_id);
             } else {
                 // If post does not exist, create a new one
                 $item_id = 0;
-                error_log('Creating new item for card: ' . $row['card']);
+                //error_log('Creating new item for card: ' . $row['card']);
             }
 
             // Collect all URL fields
             $media_urls = [];
             foreach ($row as $key => $value) {
                 if (strpos($key, 'url_') === 0 && !empty($value)) {
-                    $media_urls[] = $value;
+                    $clean_url = trim($value);
+                    $clean_url = rtrim($clean_url, '#');
+                    $media_urls[] = $clean_url;
                 }
             }
 
