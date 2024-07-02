@@ -38,7 +38,7 @@ function process_media_urls($media_array) {
         if (strpos($url, 'youtube.com') !== false || strpos($url, 'youtu.be') !== false) {
             $video_id = '';
             // Atualização da expressão regular para capturar o ID do vídeo em várias formas de URLs do YouTube
-            if (preg_match('/(?:youtube\.com\/(?:[^\/\n\s]*\/)*(?:v|embed|watch)\?v=|youtu\.be\/)([^"&?\/\s]{11})/i', $url, $match)) {
+            if (preg_match('/(?<=v=)[a-zA-Z0-9-]+(?=&)|(?<=[0-9]/)[^&\n]+|(?<=v=)[^&\n]+/i', $url, $match)) {
                 $video_id = $match[1];
             }
             if (!empty($video_id)) {
