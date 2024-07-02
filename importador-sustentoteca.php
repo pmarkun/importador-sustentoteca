@@ -18,29 +18,34 @@ function importador_sustentoteca_menu() {
 
 add_action('admin_menu', 'importador_sustentoteca_menu');
 
+function extract_youtube_id($url) {
+    $pattern = '/(?<=v=)[a-zA-Z0-9-]+(?=&)|(?<=[0-9]\/)[^&\n]+|(?<=v=)[^&\n]+/i';
+    if (preg_match($pattern, $url, $matches)) {
+        return $matches[1];
+    }
+    return false;
+}
+
+
 function process_media_urls($media_array) {
     $html_output = '';
 
     foreach ($media_array as $url) {
         $url = trim($url);
+        $url = rtrim($url, '#');
         if (empty($url)) {
             continue;
         }
         
-        echo 'url non filtered:'.$url;
         // Validar a URL (simplesmente verificando se parece com uma URL)
         if (!filter_var($url, FILTER_VALIDATE_URL)) {
             continue; // Pula URLs que não são válidas
         }
 
         $url = esc_url($url); // Escape da URL para segurança
-        echo '<br><br>url filtered:'.$url;
         if (strpos($url, 'youtube.com') !== false || strpos($url, 'youtu.be') !== false) {
-            $video_id = '';
+            $video_id = extract_youtube_id($url);
             // Atualização da expressão regular para capturar o ID do vídeo em várias formas de URLs do YouTube
-            if (preg_match('/(?<=v=)[a-zA-Z0-9-]+(?=&)|(?<=[0-9]/)[^&\n]+|(?<=v=)[^&\n]+/i', $url, $match)) {
-                $video_id = $match[1];
-            }
             if (!empty($video_id)) {
                 $html_output .= '<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;"><iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" src="https://www.youtube.com/embed/' . esc_attr($video_id) . '" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><br>';
 
