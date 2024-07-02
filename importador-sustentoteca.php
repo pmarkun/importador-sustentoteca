@@ -70,20 +70,6 @@ function media_sustentoteca_shortcode($atts) {
 
 add_shortcode('media_sustentoteca', 'media_sustentoteca_shortcode');
 
-
-function media_sustentoteca_shortcode($atts) {
-    // Atributos do shortcode
-    $atts = shortcode_atts(array(
-        'post_id' => get_the_ID(), // Pega o ID do post atual se não for especificado
-    ), $atts);
-
-    // Pega o campo de mídia do post especificado
-    $media_field = get_post_meta($atts['post_id'], 'media', true); // Substitua 'media' pelo nome real do seu campo personalizado
-    return process_media_urls($media_field); // Chama a função para processar e retornar o HTML
-}
-
-add_shortcode('media_sustentoteca', 'media_sustentoteca_shortcode');
-
 function importador_sustentoteca_page() {
     // Verifica se o usuário enviou o formulário e salva a API key
     if (isset($_POST['save_api_key'])) {
