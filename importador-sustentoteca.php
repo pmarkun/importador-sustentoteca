@@ -242,12 +242,12 @@ function get_search_results_context($search_query) {
         $wpsolr_query->get_posts();
         $posts = $wpsolr_query->posts;
     } catch (Exception $e) {
-        return 'Erro ao executar a busca: ' . $e->getMessage();
+        return ''; // Retorna vazio em caso de erro
     }
 
-    // Se não houver resultados, mostrar mensagem apropriada
+    // Se não houver resultados, retornar vazio
     if (empty($posts)) {
-        return 'Nenhum resultado encontrado.';
+        return '';
     }
 
     // Preparando a string de saída
@@ -296,29 +296,36 @@ function wpsolr_search_results_shortcode() {
         var searchQuery = urlParams.get('s');
         
         if (searchQuery) {
-            document.getElementById('loading-indicator').style.display = 'block';
-            fetch('<?php echo esc_url(rest_url('sustentoteca/v1/process_with_chatgpt')); ?>', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': '<?php echo esc_attr($nonce); ?>'
-                },
-                body: JSON.stringify({ prompt: searchQuery, context: get_search_results_context(searchQuery) }) // Adapte conforme necessário para passar o contexto
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('loading-indicator').style.display = 'none';
-                if (data) {
-                    document.getElementById('search-results').innerHTML = data;
-                } else {
-                    document.getElementById('search-results').innerHTML = 'Erro ao processar a resposta da IA.';
-                }
-            })
-            .catch(error => {
-                document.getElementById('loading-indicator').style.display = 'none';
-                console.error('Erro:', error);
-                document.getElementById('search-results').innerHTML = 'Erro ao conectar com a API de IA.';
-            });
+            // Obter o contexto dos resultados da busca
+            var context = '<?php echo esc_js(get_search_results_context($searchQuery)); ?>';
+            
+            if (context !== '') {
+                document.getElementById('loading-indicator').style.display = 'block';
+                fetch('<?php echo esc_url(rest_url('sustentoteca/v1/process_with_chatgpt')); ?>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-WP-Nonce': '<?php echo esc_attr($nonce); ?>'
+                    },
+                    body: JSON.stringify({ prompt: searchQuery, context: context }) // Passa o contexto obtido da função PHP
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loading-indicator').style.display = 'none';
+                    if (data) {
+                        document.getElementById('search-results').innerHTML = data;
+                    } else {
+                        document.getElementById('search-results').innerHTML = 'Erro ao processar a resposta da IA.';
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('loading-indicator').style.display = 'none';
+                    console.error('Erro:', error);
+                    document.getElementById('search-results').innerHTML = 'Erro ao conectar com a API de IA.';
+                });
+            } else {
+                document.getElementById('search-results').innerHTML = 'Nenhum resultado encontrado.';
+            }
         } else {
             document.getElementById('search-results').innerHTML = 'Por favor, forneça um termo de busca na URL como ?s=termo.';
         }
