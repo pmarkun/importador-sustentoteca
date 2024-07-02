@@ -27,7 +27,7 @@ function importador_conteudo( $file ) {
         error_log('Starting import of ' . $total_found . ' items.');
         foreach ( $parsed_data['items'] as $row ) {
             $params = array(
-                'where' => sprintf("card.meta_value = '%s'", addslashes($row['carta']))
+                'where' => sprintf("card.meta_value = '%s'", addslashes($row['card']))
             );
             $pod->find($params);
             if ($pod->total() > 0) {
@@ -38,7 +38,7 @@ function importador_conteudo( $file ) {
             } else {
                 // If post does not exist, create a new one
                 $item_id = 0;
-                error_log('Creating new item for card: ' . $row['carta']);
+                error_log('Creating new item for card: ' . $row['card']);
             }
 
             // Collect all URL fields
@@ -50,9 +50,9 @@ function importador_conteudo( $file ) {
             }
 
             $data = array(
-                'post_title' => $row['conteúdo_linha_do_tempo'],
-                'post_content' => $row['descrição_-_porque_é_importante'],
-                'card' => $row['carta'],
+                'post_title' => $row['title'],
+                'post_content' => $row['description'],
+                'card' => $row['card'],
                 'media' => $media_urls
             );
 
