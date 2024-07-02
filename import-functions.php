@@ -14,10 +14,15 @@ function importador_conteudo( $file ) {
         return new WP_Error( 'missing_function', 'pods_migrate function not found' );
     }
 
+    // Aumentar o tempo máximo de execução e o limite de memória
+    set_time_limit(0);
+    ini_set('memory_limit', '256M');
+
     $migrate = pods_migrate();
     $contents = file_get_contents( $file );
     $parsed_data = $migrate->parse_sv( $contents, ',' );
     $pod = pods( 'conteudo' ); // Update to your pod name
+
     if ( $pod->exists() ) {
         echo '<p>Pelo menos o POD existe</p>';
     }
@@ -25,6 +30,21 @@ function importador_conteudo( $file ) {
     if ( ! empty( $parsed_data['items'] ) ) {
         $total_found = count( $parsed_data['items'] );
         error_log('Starting import of ' . $total_found . ' items.');
+        
+        // Barra de progresso inicial
+        echo '<p>Importando itens: <span id="progress">0%</span></p>';
+        echo '<div style="width: 100%; background-color: #f3f3f3;"><div id="progress-bar" style="width: 0%; height: 20px; background-color: #4caf50;"></div></div>';
+        echo '<script>
+        function updateProgress(percent) {
+            document.getElementById("progress").innerText = percent + "%";
+            document.getElementById("progress-bar").style.width = percent + "%";
+        }
+        </script>';
+
+        $batch_size = 50; // Tamanho do lote
+        $current = 0;
+        $processed = 0;
+
         foreach ( $parsed_data['items'] as $row ) {
             $params = array(
                 'where' => sprintf("card.meta_value = '%s'", addslashes($row['card']))
@@ -61,6 +81,21 @@ function importador_conteudo( $file ) {
             } else {
                 $pod->add($data);
             }
+
+            $processed++;
+            // Atualiza a barra de progresso
+            $percent = intval(($processed / $total_found) * 100);
+            echo '<script>updateProgress(' . $percent . ');</script>';
+            flush(); // Força a saída do buffer para o navegador
+
+            $current++;
+
+            // Processar em lotes menores para evitar timeout
+            if ($current >= $batch_size) {
+                $current = 0;
+                // Pausa para evitar timeout
+                sleep(1);
+            }
         }
     } else {
         error_log('No items found to import.');
@@ -68,4 +103,3 @@ function importador_conteudo( $file ) {
     }
     return true;
 }
-
