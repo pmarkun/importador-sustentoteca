@@ -27,13 +27,14 @@ function process_media_urls($media_array) {
             continue;
         }
         
+        echo 'url non filtered:'.$url;
         // Validar a URL (simplesmente verificando se parece com uma URL)
         if (!filter_var($url, FILTER_VALIDATE_URL)) {
             continue; // Pula URLs que não são válidas
         }
 
         $url = esc_url($url); // Escape da URL para segurança
-
+        echo '<br><br>url filtered:'.$url;
         if (strpos($url, 'youtube.com') !== false || strpos($url, 'youtu.be') !== false) {
             $video_id = '';
             // Atualização da expressão regular para capturar o ID do vídeo em várias formas de URLs do YouTube
@@ -60,11 +61,8 @@ function media_sustentoteca_shortcode($atts) {
     ), $atts);
 
     // Pega o campo de mídia do post especificado
-    echo get_the_ID();
-    print_r(get_post_meta($atts['post_id']));
-    
     $media_field = get_post_meta($atts['post_id'], 'media'); // Substitua 'media' pelo nome real do seu campo personalizado
-    print_r($media_field);
+    
     if (is_array($media_field)) {
         return process_media_urls($media_field); // Chama a função para processar e retornar o HTML
     } else {
