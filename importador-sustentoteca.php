@@ -185,7 +185,7 @@ function process_with_chatgpt($prompt, $context) {
     $data = array(
         'model' => 'gpt-3.5-turbo-0125',
         'messages' => array(
-            array('role' => 'system', 'content' => 'Você é um assistente que ajuda os usuários a navegar pelo conteúdo da Sustentoteca, um repositório de informações sobre sustentabilidade. Aqui estão os resultados de uma busca pelo termo "<string>". Com base nos resultados encontrados, elabore um parágrafo bem curto que auxilie o usuário a entender e navegar pelo tema pesquisado, destacando em negrito com <b></b> os trechos que se conectam com documentos na plataforma:'),
+            array('role' => 'system', 'content' => 'Você é um assistente que ajuda os usuários a navegar pelo conteúdo da Sustentoteca, um repositório de informações sobre sustentabilidade. Aqui estão os resultados de uma busca pelo termo '.$prompt.'. Com base nos resultados encontrados, elabore um parágrafo bem curto que auxilie o usuário a entender e navegar pelo tema pesquisado, destacando em negrito com <b></b> os trechos que se conectam com documentos na plataforma:'),
             array('role' => 'user', 'content' => 'Termo buscado:' . $prompt . "\n\nResultados:\n" . $context),
         ),
         'max_tokens' => 200,
@@ -237,9 +237,8 @@ function wpsolr_search_results_shortcode() {
             })
             .then(response => response.json())
             .then(data => {
-                console.log(data);
-                if (data && data.message) {
-                    document.getElementById('search-results').innerHTML = data.message.content;
+                if (data) {
+                    document.getElementById('search-results').innerHTML = data;
                 } else {
                     document.getElementById('search-results').innerHTML = 'Erro ao processar a resposta da IA.';
                 }
